@@ -1,0 +1,9 @@
+#!/bin/bash
+
+TOMON=`date '+%Y%m'`; export TOMON;
+TODAY=`date '+%Y%m%d'`; export TODAY;
+
+#/usr/local/mysql/bin/mysqldump --all --add-drop-table -u root tc2000 > /httpd/db/tc2000-$TODAY.sql 2>&1
+tar czvf /httpd/db/tc2000-$TODAY.tgz /httpd/htdocs/schema/$TOMON/tc2000.sql.$TODAY 2>&1
+
+/httpd/tc/del_tc_so.pl

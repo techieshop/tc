@@ -1,0 +1,118 @@
+<?php
+
+if ($conn_db != 1) {
+  $db = mysql_connect("localhost", "root");
+  mysql_select_db("tc2000",$db);
+  $conn_db = 1;
+}
+
+printf("<html><head>");
+printf("<title>銷售統計</title>");
+printf("<meta content=\"text/html; charset=big5\" http-equiv=Content-Type>");
+printf("</head><body bgcolor=#ffffff topMargin=5 bottomMargin=0>");
+
+printf("<table border=0 cellpadding=0 cellspacing=0 width=600><tr nowrap>");
+printf("<td align=left width=50><b>報表 : </b></td>");
+printf("<td align=left width=330>銷售統計</td>");
+printf("<td align=right width=50><b>日期 : </b></td>");
+$array2 = split("-", $date_to, 4);
+$date_to1 = date("Y-m-d",mktime(0,0,0,$array2[1],$array2[2]-1,$array2[0]));
+printf("<td align=right width=170>%s至%s</td>",$date_fr,$date_to1);
+printf("</tr><tr nowrap>");
+printf("<td align=left><b>客戶 : </b></td>");
+
+$query = "select customer_name from ntt_customer where customer_id='$custno'";
+$result = mysql_query($query,$db);
+$myrow = mysql_fetch_array($result);
+printf("<td align=left colspan=3>%s</td>",$myrow["customer_name"]);
+printf("</tr></table>");
+printf("<table border=0 cellpadding=0 cellspacing=0 width=600><tr nowrap><td>&nbsp;</td></tr></table>");
+
+printf("<table border=0 cellpadding=0 cellspacing=0 width=600><tr>");
+printf("<td colspan=7><hr size=1 noshade width=100%%></td>");
+printf("</tr><tr>");
+printf("<td align=center><b>&nbsp;</b></td>");
+printf("<td align=center colspan=2><b>廚</b></td>");
+printf("<td align=center colspan=2><b>點</b></td>");
+printf("<td align=center colspan=2><b>味</b></td>");
+printf("</tr><tr>");
+printf("<td align=center width=150><b>貨品</b></td>");
+printf("<td align=right width=50><b>件數</b></td>");
+printf("<td align=right width=100><b>重量</b></td>");
+printf("<td align=right width=50><b>件數</b></td>");
+printf("<td align=right width=100><b>重量</b></td>");
+printf("<td align=right width=50><b>件數</b></td>");
+printf("<td align=right width=100><b>重量</b></td>");
+printf("</tr><tr>");
+printf("<td colspan=7><hr size=1 noshade width=100%%></td>");
+printf("</tr>");
+$query = "select distinct vol_order_line.product_id from vol_product,vol_order_head,vol_order_line where (so_date >= '$date_fr' and so_date < '$date_to') and (customer_id='$custno' and vol_order_line.status != '117' and vol_order_head.order_id=vol_order_line.order_id and vol_product.product_id=vol_order_line.product_id) group by product_id order by sort_order";
+$result = mysql_query($query,$db);
+while ($myrow = mysql_fetch_array($result)) {
+  $no = $myrow["product_id"];
+  $query = "select product_name,product_unit_id from vol_product where product_id='$no'";
+  $result1 = mysql_query($query,$db);
+  $myrow = mysql_fetch_array($result1);
+  $uni = $myrow["product_unit_id"];
+  printf("<tr>");
+  printf("<td align=left>%s</td>",$myrow["product_name"]);
+  $query = "select sum(qty),sum(weight) from vol_order_head,vol_order_line where (so_date >= '$date_fr' and so_date < '$date_to') and (customer_id='$custno' and remark='廚' and product_id='$no' and status != '117' and vol_order_head.order_id=vol_order_line.order_id)";
+  $result1 = mysql_query($query,$db);
+  $myrow = mysql_fetch_array($result1);
+  $qty = $myrow["sum(qty)"]-0;
+  $wt = $myrow["sum(weight)"]-0;
+  if ($qty != 0) {
+    printf("<td align=right>%s</td>",$qty);
+  }
+  else {
+    printf("<td align=right>&nbsp;</td>");
+  }
+  if ($wt != 0) {
+    printf("<td align=right>%s</td>",$wt.$uni);
+  }
+  else {
+    printf("<td align=right>&nbsp;</td>");
+  }
+  $query = "select sum(qty),sum(weight) from vol_order_head,vol_order_line where (so_date >= '$date_fr' and so_date < '$date_to') and (customer_id='$custno' and remark='點' and product_id='$no' and status != '117' and vol_order_head.order_id=vol_order_line.order_id)";
+  $result1 = mysql_query($query,$db);
+  $myrow = mysql_fetch_array($result1);
+  $qty = $myrow["sum(qty)"]-0;
+  $wt = $myrow["sum(weight)"]-0;
+  if ($qty != 0) {
+    printf("<td align=right>%s</td>",$qty);
+  }
+  else {
+    printf("<td align=right>&nbsp;</td>");
+  }
+  if ($wt != 0) {
+    printf("<td align=right>%s</td>",$wt.$uni);
+  }
+  else {
+    printf("<td align=right>&nbsp;</td>");
+  }
+  $query = "select sum(qty),sum(weight) from vol_order_head,vol_order_line where (so_date >= '$date_fr' and so_date < '$date_to') and (customer_id='$custno' and remark='味' and product_id='$no' and status != '117' and vol_order_head.order_id=vol_order_line.order_id)";
+  $result1 = mysql_query($query,$db);
+  $myrow = mysql_fetch_array($result1);
+  $qty = $myrow["sum(qty)"]-0;
+  $wt = $myrow["sum(weight)"]-0;
+  if ($qty != 0) {
+    printf("<td align=right>%s</td>",$qty);
+  }
+  else {
+    printf("<td align=right>&nbsp;</td>");
+  }
+  if ($wt != 0) {
+    printf("<td align=right>%s</td>",$wt.$uni);
+  }
+  else {
+    printf("<td align=right>&nbsp;</td>");
+  }
+  printf("</tr>");
+}
+printf("<tr>");
+printf("<td colspan=7><hr size=1 noshade width=100%%></td>");
+printf("</tr>");
+printf("</TABLE></BODY></HTML>");
+mysql_close($db);
+
+?>
